@@ -72,19 +72,14 @@ const GithubApp = () => {
         );
         const repoLanguages = await langResp.json();
         for (let lang in repoLanguages) {
-          console.log(lang);
           if (lang in languageObject) {
             const newObject = languageObject;
             newObject[lang] += 1;
             setLanguageObject(newObject);
-            console.log("state", languageObject);
           } else {
-            console.log("here");
             const newObject = languageObject;
             newObject[lang] = 1;
-            console.log("newObj", newObject);
             setLanguageObject(newObject);
-            console.log("state", languageObject);
           }
         }
       };
@@ -95,25 +90,10 @@ const GithubApp = () => {
             l.push(["Languages", "Count"]);
             setLanguages([]);
             for (let key in languageObject) {
-              console.log("in the loop");
-              console.log(key);
               l.push([key, languageObject[key]]);
             }
             setLanguages(l);
-            console.log("end");
           });
-          // } else if (repo.language) {
-          //   if (repo.language in languageObject) {
-          //     setLanguageObject(
-          //       ...languageObject,
-          //       (languageObject[repo.language] += 1)
-          //     );
-          //   } else {
-          //     setLanguageObject(
-          //       ...languageObject,
-          //       (languageObject[repo.language] = 1)
-          //     );
-          //   }
         }
       });
     } else {
