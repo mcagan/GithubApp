@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./GithubApp.scss";
 import MyPieChart from "./MyPieChart";
 import Button from "@material-ui/core/Button";
@@ -13,6 +13,7 @@ const GithubApp = () => {
   const [avatarsrc, setAvatarsrc] = useState("");
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
+  const [repoName, setRepoName] = useState("");
 
   const myHeaders = new Headers();
   const authHeader =
@@ -66,7 +67,21 @@ const GithubApp = () => {
     if (userRepositories && userRepositories.length > 0) {
       const languageMap = new Map();
       userRepositories.forEach((repo) => {
-        if (repo.language) {
+        setRepoName(repo.name);
+        if (repo.languages_url) {
+          const langResp = fetch(
+            `https://api.github.com/repos/${username}/${repoName}/languages`
+          );
+          const repoLanguages = langResp.json();
+          console.log(repoLanguages);
+          for (let lang in repoLanguages) {
+            if (languageMap.has(lang)) {
+              languageMap.set(lang, languageMap.get(lang) + 1);
+            } else {
+              languageMap.set(lang, 1);
+            }
+          }
+        } else if (repo.language) {
           if (languageMap.has(repo.language)) {
             languageMap.set(repo.language, languageMap.get(repo.language) + 1);
           } else {
