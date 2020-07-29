@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./GithubApp.scss";
 import MyPieChart from "./MyPieChart";
 import Button from "@material-ui/core/Button";
@@ -13,7 +13,7 @@ const GithubApp = () => {
   const [avatarsrc, setAvatarsrc] = useState("");
   const [followers, setFollowers] = useState(0);
   const [following, setFollowing] = useState(0);
-  const [repoName, setRepoName] = useState("");
+  const [languageObject, setLanguageObject] = useState({});
 
   const myHeaders = new Headers();
   const authHeader =
@@ -63,39 +63,59 @@ const GithubApp = () => {
       requestOptions
     );
     const userRepositories = await resp.json();
-    console.log(userRepositories);
+
     if (userRepositories && userRepositories.length > 0) {
-      const languageMap = new Map();
-      userRepositories.forEach((repo) => {
-        setRepoName(repo.name);
-        if (repo.languages_url) {
-          const langResp = fetch(
-            `https://api.github.com/repos/${username}/${repoName}/languages`
-          );
-          const repoLanguages = langResp.json();
-          console.log(repoLanguages);
-          for (let lang in repoLanguages) {
-            if (languageMap.has(lang)) {
-              languageMap.set(lang, languageMap.get(lang) + 1);
-            } else {
-              languageMap.set(lang, 1);
-            }
-          }
-        } else if (repo.language) {
-          if (languageMap.has(repo.language)) {
-            languageMap.set(repo.language, languageMap.get(repo.language) + 1);
+      const getRepoLang = async (name) => {
+        const langResp = await fetch(
+          `https://api.github.com/repos/${username}/${name}/languages`,
+          requestOptions
+        );
+        const repoLanguages = await langResp.json();
+        for (let lang in repoLanguages) {
+          console.log(lang);
+          if (lang in languageObject) {
+            const newObject = languageObject;
+            newObject[lang] += 1;
+            setLanguageObject(newObject);
+            console.log("state", languageObject);
           } else {
-            languageMap.set(repo.language, 1);
+            console.log("here");
+            const newObject = languageObject;
+            newObject[lang] = 1;
+            console.log("newObj", newObject);
+            setLanguageObject(newObject);
+            console.log("state", languageObject);
           }
         }
+      };
+      userRepositories.forEach((repo) => {
+        if (repo.languages_url) {
+          getRepoLang(repo.name).then(() => {
+            const l = [];
+            l.push(["Languages", "Count"]);
+            setLanguages([]);
+            for (let key in languageObject) {
+              console.log("in the loop");
+              console.log(key);
+              l.push([key, languageObject[key]]);
+            }
+            setLanguages(l);
+            console.log("end");
+          });
+          // } else if (repo.language) {
+          //   if (repo.language in languageObject) {
+          //     setLanguageObject(
+          //       ...languageObject,
+          //       (languageObject[repo.language] += 1)
+          //     );
+          //   } else {
+          //     setLanguageObject(
+          //       ...languageObject,
+          //       (languageObject[repo.language] = 1)
+          //     );
+          //   }
+        }
       });
-      setLanguages([]);
-      const l = [];
-      l.push(["Languages", "Count"]);
-      languageMap.forEach((value, key) => {
-        l.push([key, value]);
-      });
-      setLanguages((languages) => l);
     } else {
       setErrormsg("Not a valid user");
     }
