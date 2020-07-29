@@ -62,6 +62,7 @@ const GithubApp = () => {
       requestOptions
     );
     const userRepositories = await resp.json();
+    console.log(userRepositories);
     if (userRepositories && userRepositories.length > 0) {
       const languageMap = new Map();
       userRepositories.forEach((repo) => {
